@@ -1,0 +1,35 @@
+{
+  "name": "claude-brain",
+  "version": "0.1.0",
+  "description": "Local-first persistent memory for Claude Code. Semantic search, auto-embedding, team brain. Zero cloud dependency.",
+  "author": "Like One <hello@likeone.ai>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/likeone-ai/claude-brain"
+  },
+  "keywords": [
+    "claude-code",
+    "memory",
+    "rag",
+    "persistent-context",
+    "embeddings",
+    "chromadb",
+    "ollama",
+    "ai-tools",
+    "mcp",
+    "developer-tools"
+  ],
+  "bin": {
+    "claude-brain": "./bin/claude-brain.sh"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
