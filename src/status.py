@@ -8,6 +8,16 @@ from pathlib import Path
 
 import chromadb
 import requests
+from urllib.parse import urlparse
+
+ALLOWED_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0"}
+
+
+def _validate_local_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.hostname not in ALLOWED_HOSTS:
+        raise ValueError(f"URL host must be local, got: {parsed.hostname}")
+    return url
 
 
 def main():
@@ -29,6 +39,7 @@ def main():
         print(f"  Ollama: {config.get('ollama_url', '?')}")
     else:
         config = {"ollama_url": "http://localhost:11434"}
+    _validate_local_url(config.get("ollama_url", "http://localhost:11434"))
 
     # Ollama status
     try:

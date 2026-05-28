@@ -11,17 +11,30 @@ from pathlib import Path
 
 import chromadb
 import requests
+from urllib.parse import urlparse
+
+ALLOWED_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0"}
+
+
+def _validate_local_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.hostname not in ALLOWED_HOSTS:
+        raise ValueError(f"URL host must be local, got: {parsed.hostname}")
+    return url
 
 
 def load_config(brain_dir):
     config_path = brain_dir / "config.json"
     if config_path.exists():
-        return json.loads(config_path.read_text())
-    return {
-        "ollama_url": "http://localhost:11434",
-        "embed_model": "mxbai-embed-large",
-        "collections": ["brain_entries", "memory_files", "sessions", "skills"],
-    }
+        cfg = json.loads(config_path.read_text())
+    else:
+        cfg = {
+            "ollama_url": "http://localhost:11434",
+            "embed_model": "mxbai-embed-large",
+            "collections": ["brain_entries", "memory_files", "sessions", "skills"],
+        }
+    _validate_local_url(cfg.get("ollama_url", "http://localhost:11434"))
+    return cfg
 
 
 def get_embedding(text, config):
