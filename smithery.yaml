@@ -1,0 +1,14 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      brainDir:
+        type: string
+        description: "Brain directory path (default: ~/.claude-brain)"
+        default: "~/.claude-brain"
+  commandFunction: |-
+    (config) => ({
+      command: "python3",
+      args: ["src/mcp_server.py", config.brainDir || "~/.claude-brain"]
+    })
