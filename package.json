@@ -4,9 +4,13 @@
   "description": "Local-first persistent memory for Claude Code. Semantic search, auto-embedding, team brain. Zero cloud dependency.",
   "author": "Like One <hello@likeone.ai>",
   "license": "MIT",
+  "homepage": "https://github.com/sophiacave/claude-brain#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/likeone-ai/claude-brain"
+    "url": "git+https://github.com/sophiacave/claude-brain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sophiacave/claude-brain/issues"
   },
   "keywords": [
     "claude-code",
@@ -18,7 +22,9 @@
     "ollama",
     "ai-tools",
     "mcp",
-    "developer-tools"
+    "developer-tools",
+    "local-first",
+    "vector-search"
   ],
   "bin": {
     "claude-brain": "./bin/claude-brain.sh"
@@ -29,6 +35,9 @@
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "postinstall": "echo '\\nclaude-brain installed. Run: claude-brain init\\nRequires: Python 3.10+, Ollama, pip install chromadb requests\\n'"
+  },
   "engines": {
     "node": ">=18"
   }
