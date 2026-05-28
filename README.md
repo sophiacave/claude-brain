@@ -1,4 +1,9 @@
-# claude-brain
+# Claude Brain
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![Tests: 28 passing](https://img.shields.io/badge/Tests-28%20passing-green.svg)](tests/)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-orange.svg)](https://modelcontextprotocol.io)
 
 **Local-first persistent memory for Claude Code.** Semantic search, auto-embedding, team brain. Zero cloud dependency.
 
