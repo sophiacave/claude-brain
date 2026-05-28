@@ -37,13 +37,28 @@ def get_embedding(text):
     return None
 
 
+def _check_init():
+    """Verify brain is initialized. Returns error dict if not."""
+    if not BRAIN_DIR.exists() or not (BRAIN_DIR / "brain.db").exists():
+        return {"error": f"Brain not initialized. Run: claude-brain init (or python3 {Path(__file__).parent}/init.py {BRAIN_DIR})"}
+    return None
+
+
 def brain_search(query, top_k=5):
     """Semantic search across all brain collections."""
+    err = _check_init()
+    if err:
+        return err
+
+    chroma_path = BRAIN_DIR / "vector_store"
+    if not chroma_path.exists():
+        return {"error": "No vector store. Run: claude-brain embed full"}
+
     embedding = get_embedding(query)
     if not embedding:
-        return {"error": "Failed to embed query"}
+        return {"error": "Failed to embed query. Is Ollama running?"}
 
-    client = chromadb.PersistentClient(path=str(BRAIN_DIR / "vector_store"))
+    client = chromadb.PersistentClient(path=str(chroma_path))
     results = []
 
     for col in client.list_collections():
@@ -67,6 +82,9 @@ def brain_search(query, top_k=5):
 
 def brain_write(key, value, description="", category="general", priority=5):
     """Write a key-value entry to the brain."""
+    err = _check_init()
+    if err:
+        return err
     db = sqlite3.connect(str(BRAIN_DIR / "brain.db"))
     val_str = json.dumps(value) if not isinstance(value, str) else value
 
@@ -81,6 +99,9 @@ def brain_write(key, value, description="", category="general", priority=5):
 
 def brain_read(key):
     """Read a specific key from the brain."""
+    err = _check_init()
+    if err:
+        return err
     db = sqlite3.connect(str(BRAIN_DIR / "brain.db"))
     row = db.execute("SELECT * FROM brain_context WHERE key = ?", (key,)).fetchone()
     db.close()
@@ -92,15 +113,24 @@ def brain_read(key):
 
 def brain_status():
     """Get brain health status."""
+    err = _check_init()
+    if err:
+        return err
+
     db = sqlite3.connect(str(BRAIN_DIR / "brain.db"))
     entries = db.execute("SELECT COUNT(*) FROM brain_context").fetchone()[0]
     db.close()
 
-    client = chromadb.PersistentClient(path=str(BRAIN_DIR / "vector_store"))
-    vectors = sum(col.count() for col in client.list_collections())
+    chroma_path = BRAIN_DIR / "vector_store"
+    if chroma_path.exists():
+        client = chromadb.PersistentClient(path=str(chroma_path))
+        vectors = sum(col.count() for col in client.list_collections())
+        collections = {col.name: col.count() for col in client.list_collections()}
+    else:
+        vectors = 0
+        collections = {}
 
-    return {"entries": entries, "vectors": vectors,
-            "collections": {col.name: col.count() for col in client.list_collections()}}
+    return {"entries": entries, "vectors": vectors, "collections": collections}
 
 
 # MCP stdio protocol handler
