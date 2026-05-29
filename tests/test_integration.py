@@ -12,7 +12,7 @@ PASS = 0
 FAIL = 0
 
 
-def test(name, condition):
+def check(name, condition):
     global PASS, FAIL
     if condition:
         PASS += 1
@@ -64,26 +64,26 @@ def test_brain_write_and_read():
 
             # Write
             result = brain_write("test.new_key", "hello world", "A test entry", "test", 7)
-            test("brain_write returns saved status", result.get("status") == "saved")
-            test("brain_write returns correct key", result.get("key") == "test.new_key")
+            check("brain_write returns saved status", result.get("status") == "saved")
+            check("brain_write returns correct key", result.get("key") == "test.new_key")
 
             # Read back
             result = brain_read("test.new_key")
-            test("brain_read returns value", result.get("value") == "hello world")
-            test("brain_read returns category", result.get("category") == "test")
+            check("brain_read returns value", result.get("value") == "hello world")
+            check("brain_read returns category", result.get("category") == "test")
 
             # Read existing
             result = brain_read("test.key")
-            test("brain_read existing key works", result.get("value") == "test value")
+            check("brain_read existing key works", result.get("value") == "test value")
 
             # Read nonexistent
             result = brain_read("nonexistent.key")
-            test("brain_read missing key returns error", "error" in result)
+            check("brain_read missing key returns error", "error" in result)
 
             # Overwrite
             brain_write("test.key", "updated value")
             result = brain_read("test.key")
-            test("brain_write overwrites existing key", result.get("value") == "updated value")
+            check("brain_write overwrites existing key", result.get("value") == "updated value")
 
         finally:
             mcp_server.BRAIN_DIR = original_dir
@@ -104,8 +104,8 @@ def test_brain_status():
             from mcp_server import brain_status
 
             result = brain_status()
-            test("brain_status returns entries count", result.get("entries", 0) >= 1)
-            test("brain_status has vectors field", "vectors" in result)
+            check("brain_status returns entries count", result.get("entries", 0) >= 1)
+            check("brain_status has vectors field", "vectors" in result)
 
         finally:
             mcp_server.BRAIN_DIR = original_dir
@@ -123,13 +123,13 @@ def test_init_check():
         from mcp_server import brain_read, brain_write, brain_status
 
         result = brain_read("any.key")
-        test("brain_read on uninit returns error", "error" in result)
+        check("brain_read on uninit returns error", "error" in result)
 
         result = brain_write("any.key", "value")
-        test("brain_write on uninit returns error", "error" in result)
+        check("brain_write on uninit returns error", "error" in result)
 
         result = brain_status()
-        test("brain_status on uninit returns error", "error" in result)
+        check("brain_status on uninit returns error", "error" in result)
 
     finally:
         mcp_server.BRAIN_DIR = original_dir
@@ -142,22 +142,22 @@ def test_mcp_protocol():
     from mcp_server import handle_request
 
     resp = handle_request({"method": "initialize", "id": 1})
-    test("initialize returns serverInfo", "serverInfo" in resp)
-    test("server name is claude-brain", resp["serverInfo"]["name"] == "claude-brain")
+    check("initialize returns serverInfo", "serverInfo" in resp)
+    check("server name is claude-brain", resp["serverInfo"]["name"] == "claude-brain")
 
     resp = handle_request({"method": "tools/list", "id": 2})
     tools = resp["tools"]
     tool_names = [t["name"] for t in tools]
-    test("4 tools listed", len(tools) == 4)
-    test("brain_search exists", "brain_search" in tool_names)
-    test("brain_write exists", "brain_write" in tool_names)
-    test("brain_read exists", "brain_read" in tool_names)
-    test("brain_status exists", "brain_status" in tool_names)
+    check("4 tools listed", len(tools) == 4)
+    check("brain_search exists", "brain_search" in tool_names)
+    check("brain_write exists", "brain_write" in tool_names)
+    check("brain_read exists", "brain_read" in tool_names)
+    check("brain_status exists", "brain_status" in tool_names)
 
     # Schema validation
     for tool in tools:
         schema = tool.get("inputSchema", {})
-        test(f"{tool['name']} has input schema", schema.get("type") == "object")
+        check(f"{tool['name']} has input schema", schema.get("type") == "object")
 
     # Unknown tool
     resp = handle_request({
@@ -166,11 +166,11 @@ def test_mcp_protocol():
         "id": 3
     })
     result = json.loads(resp["content"][0]["text"])
-    test("unknown tool returns error", "error" in result)
+    check("unknown tool returns error", "error" in result)
 
     # Unknown method
     resp = handle_request({"method": "nonexistent/method", "id": 4})
-    test("unknown method returns error", "error" in resp)
+    check("unknown method returns error", "error" in resp)
 
 
 def test_brain_write_types():
@@ -190,19 +190,19 @@ def test_brain_write_types():
             # String value
             brain_write("types.string", "hello")
             result = brain_read("types.string")
-            test("String value preserved", result["value"] == "hello")
+            check("String value preserved", result["value"] == "hello")
 
             # Dict value (should be JSON-serialized)
             brain_write("types.dict", {"foo": "bar", "num": 42})
             result = brain_read("types.dict")
             parsed = json.loads(result["value"])
-            test("Dict value JSON-serialized", parsed["foo"] == "bar")
+            check("Dict value JSON-serialized", parsed["foo"] == "bar")
 
             # List value
             brain_write("types.list", [1, 2, 3])
             result = brain_read("types.list")
             parsed = json.loads(result["value"])
-            test("List value JSON-serialized", parsed == [1, 2, 3])
+            check("List value JSON-serialized", parsed == [1, 2, 3])
 
         finally:
             mcp_server.BRAIN_DIR = original_dir
